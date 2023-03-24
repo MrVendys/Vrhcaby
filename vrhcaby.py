@@ -1,4 +1,8 @@
 print("Hello world")
+
+def f(x):
+  return x
+
 #git config user.email "vasik.ptak@gmail.com"
 #git config user.name "MrVendys"
 #git add . -> přidá všechny soubory od Gitu
