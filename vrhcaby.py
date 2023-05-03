@@ -23,11 +23,6 @@ class piece:
         self.pieceColor = pieceColor
 
 
-class dice:
-    def __init__(self, numberOfSides: int):
-        self.numberOfSides = numberOfSides
-
-
 gameBoard = board()
 Venca = player("black")
 Stepan = player("white")
