@@ -9,6 +9,7 @@
 import queue
 import random
 import pygame
+import spike
 
 WIDTH, HEIGHT = 850, 800
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
@@ -22,7 +23,8 @@ class gameBoard:
         self.dice2 = dice()
         self.boardList = []
         for i in range(24):
-            self.boardList.append(queue.LifoQueue(5))
+            Spike = spike((139,69,19) if i%2 == 0 else (205,133,63),queue.LifoQueue(5))
+            self.boardList.append(spike)
 
     def throwDices(self):
         self.dice1.throw()
@@ -46,6 +48,10 @@ class dice:
 
     def throw(self):
         self.numberOnDice = random.randint(1, 6)
+
+def drawPieces():
+    radius = 25
+    pygame.draw.circle(WIN,(0,0,0),(100+radius,50+radius),radius)
 def drawSpikes(startX,startY,direction):
     #horní bodce
     for i in range (13):
@@ -71,7 +77,7 @@ def drawGameBoard():
 def draw():
     WIN.fill(WIN_COLOR)
     drawGameBoard()
-    
+    drawPieces()
     pygame.display.update()
 
 def main():
