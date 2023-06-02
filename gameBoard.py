@@ -1,15 +1,15 @@
-import dice
-import spike
+from dice import Dice
+from spike import Spike
 import queue
 
-class gameBoard:
+class GameBoard:
     def __init__(self):
-        self.dice1 = dice()
-        self.dice2 = dice()
+        self.dice1 = Dice()
+        self.dice2 = Dice()
         self.boardList = []
         for i in range(24):
-            Spike = spike((139,69,19) if i%2 == 0 else (205,133,63),queue.LifoQueue(5))
-            self.boardList.append(spike)
+            gameSpike = Spike((139,69,19) if i%2 == 0 else (205,133,63),queue.LifoQueue(5))
+            self.boardList.append(gameSpike)
 
     def throwDices(self):
         self.dice1.throw()
