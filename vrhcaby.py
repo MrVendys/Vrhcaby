@@ -10,26 +10,15 @@ import queue
 import random
 import pygame
 import spike
+import gameBoard
+import dice
 
 WIDTH, HEIGHT = 850, 800
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 WIN_COLOR = (222,184,135)
 FPS = 60
 pygame.display.set_caption("Vrhcaby")
-
-class gameBoard:
-    def __init__(self):
-        self.dice1 = dice()
-        self.dice2 = dice()
-        self.boardList = []
-        for i in range(24):
-            Spike = spike((139,69,19) if i%2 == 0 else (205,133,63),queue.LifoQueue(5))
-            self.boardList.append(spike)
-
-    def throwDices(self):
-        self.dice1.throw()
-        self.dice2.throw()
-        return print(" Number on dice 1:", self.dice1.numberOnDice, "\n", "Number on dice 2:", self.dice2.numberOnDice)
+board = None
 
 
 class player:
@@ -40,14 +29,24 @@ class player:
 class piece:
     def __init__(self, pieceColor: str):
         self.pieceColor = pieceColor
+        
+def main():
+    board = gameBoard()
+    Venca = player("black")
+    Stepan = player("white")
 
+    clock = pygame.time.Clock()
+    print(board.boardList[0].color)
+    #run = True
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
 
-class dice:
-    def __init__(self):
-        self.numberOnDice = 1
+        draw()
 
-    def throw(self):
-        self.numberOnDice = random.randint(1, 6)
+    pygame.quit()
 
 def drawPieces():
     radius = 25
@@ -80,22 +79,7 @@ def draw():
     drawPieces()
     pygame.display.update()
 
-def main():
-    board = gameBoard()
-    Venca = player("black")
-    Stepan = player("white")
 
-    clock = pygame.time.Clock()
-    run = True
-    while run:
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-
-        draw()
-
-    pygame.quit()
 
 
 main()
