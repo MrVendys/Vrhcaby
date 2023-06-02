@@ -8,7 +8,13 @@
 
 import queue
 import random
+import pygame
 
+WIDTH, HEIGHT = 900, 500
+WIN = pygame.display.set_mode((WIDTH,HEIGHT))
+WIN_COLOR = (222,184,135)
+FPS = 60
+pygame.display.set_caption("Vrhcaby")
 
 class gameBoard:
     def __init__(self):
@@ -41,16 +47,28 @@ class dice:
     def throw(self):
         self.numberOnDice = random.randint(1, 6)
 
+def draw():
+    WIN.fill(WIN_COLOR)
+    for i in range (6):
+        pygame.draw.polygon(WIN,(139,69,19) if i%2 == 0 else (205,133,63), [[50+i*50,50],[100+i*50,50],[75+i*50,350]])
+    pygame.display.update()
 
-def playGame():
+def main():
     board = gameBoard()
     Venca = player("black")
     Stepan = player("white")
-    # gameIsOn = True
-    print("Game is on")
-    # while (gameIsOn):
-    print("Throwing dices...")
-    gameBoard.throwDices()
+
+    clock = pygame.time.Clock()
+    run = True
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        draw()
+
+    pygame.quit()
 
 
-playGame()
+main()
