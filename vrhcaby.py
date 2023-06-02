@@ -10,7 +10,7 @@ import queue
 import random
 import pygame
 
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 850, 800
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 WIN_COLOR = (222,184,135)
 FPS = 60
@@ -46,11 +46,32 @@ class dice:
 
     def throw(self):
         self.numberOnDice = random.randint(1, 6)
-
+def drawSpikes(startX,startY,direction):
+    #horní bodce
+    for i in range (13):
+        if(i==6): i+=1
+        pygame.draw.polygon(WIN,(139,69,19) if i%2 == 0 else (205,133,63), [[100+i*50,50],[100+50+i*50,50],[100+25+i*50,50+300]])
+    #spodní bodce
+    for i in range (13):
+        if(i==6): i+=1
+        pygame.draw.polygon(WIN,(205,133,63) if i%2 == 0 else (139,69,19), [[100+i*50,WIN.get_height()-50],[100+50+i*50,WIN.get_height()-50],[100+25+i*50,WIN.get_height()-50-300]])
+def drawGameBoard():
+    #horní vodorovná
+    pygame.draw.rect(WIN,(139,69,19),(0,0,WIN.get_width(),50))
+    #spodní vodorovná
+    pygame.draw.rect(WIN,(139,69,19),(0,WIN.get_height()-50,WIN.get_width(),50))
+    #levá svislá
+    pygame.draw.rect(WIN,(139,69,19),(0,0,100,WIN.get_height()))
+    #prostřední svislá
+    pygame.draw.rect(WIN,(139,69,19),(400,50,50,WIN.get_height()-100))
+    #pravá svislá
+    pygame.draw.rect(WIN,(139,69,19),(750,0,100,WIN.get_height()))
+    drawSpikes(100,50,"down")
+    drawSpikes(100,WIN.get_height()-50,"up")
 def draw():
     WIN.fill(WIN_COLOR)
-    for i in range (6):
-        pygame.draw.polygon(WIN,(139,69,19) if i%2 == 0 else (205,133,63), [[50+i*50,50],[100+i*50,50],[75+i*50,350]])
+    drawGameBoard()
+    
     pygame.display.update()
 
 def main():
