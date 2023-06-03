@@ -12,6 +12,7 @@ import pygame
 import spike
 from gameBoard import GameBoard
 import dice
+from piece import Piece
 
 WIDTH, HEIGHT = 850, 800
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
@@ -27,23 +28,15 @@ class player:
     def __init__(self, color: str):
         self.listOfPieces = [piece(color) for _ in range(15)]
 
-
-class Piece:
-    def __init__(self,color):
-        self.color = color
         
 def main():
     global board
     board = GameBoard() 
     global gamePiece
-    gamePiece = Piece((0,0,0))
-    board.boardList[0].queueOfPieces.put(gamePiece)
-    board.boardList[0].queueOfPieces.put(gamePiece)
     #Venca = player("black")
     #Stepan = player("white")
-
+    print(len(board.boardList))
     clock = pygame.time.Clock()
-    print(board.boardList[1].color)
     run = True
     while run:
         clock.tick(FPS)
@@ -57,22 +50,40 @@ def main():
 
 #TODO: vyřešit generování piece na příslušným spike
 def drawPieces():
-    for i in range(board.boardList[0].queueOfPieces.qsize()):
-        pygame.draw.circle(WIN,gamePiece.color,(100+radius,50+i*50+radius),radius)
-def drawSpikes(startX,startY,direction):
+        pygame.draw.circle(WIN,(0,0,0),(100+radius,50+radius),radius)
+def drawSpikes():
     #horní bodce
+    startX = WIDTH-100
+    startY = 50
     for i in range(12):
         if(i<6): 
-            pygame.draw.polygon(WIN,board.boardList[i].color, [[WIN.get_width()-100-i*50,50],[WIN.get_width()-100-50-i*50,50],[WIN.get_width()-100-25-i*50,50+300]])
+            pygame.draw.polygon(WIN,board.boardList[i].color, [[startX-i*50,startY],[startX-50-i*50,startY],[startX-25-i*50,startY+300]])
+            if len(board.boardList[i].queueOfPieces) > 0:
+                for j in range(len(board.boardList[i].queueOfPieces)):
+                    pygame.draw.circle(WIN,board.boardList[i].queueOfPieces[j].color,(startX-i*50-radius,startY+j*50+radius),radius)
+
         else:
             #jakmile se vykreslí 6, udělá se místo na postřední svislou čáru a začne se dál vykreslovat
-            pygame.draw.polygon(WIN,board.boardList[i].color, [[WIN.get_width()-150-i*50,50],[WIN.get_width()-150-50-i*50,50],[WIN.get_width()-150-25-i*50,50+300]])
+            startX = WIDTH-150
+            pygame.draw.polygon(WIN,board.boardList[i].color, [[startX-i*50,50],[startX-50-i*50,50],[startX-25-i*50,50+300]])
+            if len(board.boardList[i].queueOfPieces) > 0:
+                for j in range(len(board.boardList[i].queueOfPieces)):
+                    pygame.draw.circle(WIN,board.boardList[i].queueOfPieces[j].color,(startX-i*50-radius,startY+j*50+radius),radius)
     #spodní bodce
+    startX = 100
+    startY = HEIGHT-50
     for i in range (12):
         if(i+12<18):
-            pygame.draw.polygon(WIN,board.boardList[i].color, [[100+i*50,WIN.get_height()-50],[100+50+i*50,WIN.get_height()-50],[100+25+i*50,WIN.get_height()-50-300]])
+            pygame.draw.polygon(WIN,board.boardList[i].color, [[startX+i*50,startY],[startX+50+i*50,startY],[startX+25+i*50,startY-300]])
+            if len(board.boardList[i+12].queueOfPieces) > 0:
+                for j in range(len(board.boardList[i+12].queueOfPieces)):
+                    pygame.draw.circle(WIN,board.boardList[i+12].queueOfPieces[j].color,(startX+i*50+radius,startY-j*50-radius),radius)
         else:
-            pygame.draw.polygon(WIN,board.boardList[i].color, [[150+i*50,WIN.get_height()-50],[150+50+i*50,WIN.get_height()-50],[150+25+i*50,WIN.get_height()-50-300]])
+            startX = 150
+            pygame.draw.polygon(WIN,board.boardList[i].color, [[startX+i*50,startY],[startX+50+i*50,startY],[startX+25+i*50,startY-300]])
+            if len(board.boardList[i+12].queueOfPieces) > 0:
+                for j in range(len(board.boardList[i+12].queueOfPieces)):
+                    pygame.draw.circle(WIN,board.boardList[i+12].queueOfPieces[j].color,(startX+i*50+radius,startY-j*50-radius),radius)
 def drawGameBoard():
     #horní vodorovná
     pygame.draw.rect(WIN,(139,69,19),(0,0,WIN.get_width(),50))
@@ -84,12 +95,12 @@ def drawGameBoard():
     pygame.draw.rect(WIN,(139,69,19),(400,50,50,WIN.get_height()-100))
     #pravá svislá
     pygame.draw.rect(WIN,(139,69,19),(750,0,100,WIN.get_height()))
-    drawSpikes(100,50,"down")
-    drawSpikes(100,WIN.get_height()-50,"up")
+    drawSpikes()
+    drawSpikes()
 def draw():
     WIN.fill(WIN_COLOR)
     drawGameBoard()
-    drawPieces()
+    #drawPieces()
     pygame.display.update()
 
 
