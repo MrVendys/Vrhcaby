@@ -1,5 +1,6 @@
 import pygame
 from pygame import Surface
+from bar import Bar
 from dice import Dice
 from spike import Spike
 from piece import Piece
@@ -13,8 +14,10 @@ class GameBoard:
         self.dice2 = Dice()
         self.boardList = []
         self.playerPieceList = []
-        BLACK = (0,0,0)
-        WHITE = (255,255,255)
+        self.playerBBar = Bar((410,50,30,300))
+        self.playerWBar = Bar((410,450,30,300))
+        testPiece = Piece((255,255,255),-1)
+        self.playerWBar.listOfPieces.append(testPiece)
         self.createSpikes()
         self.createPieces()
         
@@ -33,6 +36,12 @@ class GameBoard:
                 for j in range(3):
                     piece = Piece((255,255,255),i)
                     self.playerPieceList.append(piece)
+                    self.boardList[i].queueOfPieces.append(piece)
+            if(i == 9): #vymazat
+                    piece = Piece((0,0,0),i)
+                    self.boardList[i].queueOfPieces.append(piece)        
+            if(i == 10): #vymazat
+                    piece = Piece((0,0,0),i)
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 11):
                 for j in range(5):
@@ -58,16 +67,13 @@ class GameBoard:
                     self.boardList[i].queueOfPieces.append(piece)
     def createSpikes(self):
          for i in range(24):
-            gameSpike = Spike((139,69,19) if i%2 == 0 else (205,133,63))
+            gameSpike = Spike((139,69,19) if i%2 == 0 else (205,133,63),i)
             self.boardList.append(gameSpike)
     def throwDices(self):
         self.dice1.throw()
         self.dice2.throw()
         return print(" Number on dice 1:", self.dice1.numberOnDice, "\n", "Number on dice 2:", self.dice2.numberOnDice)     
-    def generateNewPiece(self, piece: Piece):
-        if(piece.color == (255,255,255)):
-            #TODO hoď ho na generátor, odkud si ho hráč potom vezme
-            pass
+            
     def drawGameBoard(self,WIN: Surface):
         #horní vodorovná
         pygame.draw.rect(WIN,(139,69,19),(0,0,WIN.get_width(),50))
@@ -79,6 +85,20 @@ class GameBoard:
         pygame.draw.rect(WIN,(139,69,19),(400,50,50,WIN.get_height()-100))
         #pravá svislá
         pygame.draw.rect(WIN,(139,69,19),(750,0,100,WIN.get_height()))
+
+        pygame.draw.rect(WIN,(0,0,0),self.playerBBar.position,5)
+        pygame.draw.rect(WIN,(0,0,0),self.playerWBar.position,5)
+
+        for i in range(len(self.playerBBar.listOfPieces)):
+            self.playerBBar.listOfPieces[i].drawItself(WIN,\
+            (self.playerBBar.position[0]+15,self.playerBBar.position[1]+15+i*self.playerBBar.listOfPieces[i].radius*2)\
+            ,self.playerBBar.listOfPieces[i].radius)
+        for i in range(len(self.playerWBar.listOfPieces)):
+            print(self.playerWBar.listOfPieces[i].radius)
+            self.playerWBar.listOfPieces[i].drawItself(WIN,\
+            (self.playerWBar.position[0]+15,self.playerWBar.position[1]-15-i*25*2)\
+            ,25)
+
 
         startX = WIN.get_width()-100
         startY = 50

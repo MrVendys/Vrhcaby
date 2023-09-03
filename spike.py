@@ -4,7 +4,8 @@ from piece import Piece
 
 
 class Spike:
-    def __init__(self,color):
+    def __init__(self,color, id):
+        self.id = id
         self.position = []
         self.queueOfPieces = [] #pop / append
         self.surface = None
@@ -14,17 +15,14 @@ class Spike:
     def drawItself(self, WIN: Surface, position: tuple):
         self.position = position
         self.surface = WIN
-        pygame.draw.polygon(WIN,self.color, position)
+        pygame.draw.polygon(WIN,self.color if self.isHighlighted == False else self.HighlightedColor , position)
     def reDrawItself(self):
         pygame.draw.polygon(self.surface,self.color if self.isHighlighted == False else self.HighlightedColor , self.position)
     def addPiece(self,piece: Piece):
-        popedPiece = None
-        if(len(self.queueOfPieces)==5):
-            popedPiece = self.queueOfPieces[4]
-            self.queueOfPieces.pop()
         self.queueOfPieces.append(piece)
-        return popedPiece
     def removePiece(self):
-        self.queueOfPieces.pop()
+        popedPiece = None
+        popedPiece = self.queueOfPieces.pop()
+        return popedPiece
                 
 

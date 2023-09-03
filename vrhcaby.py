@@ -18,9 +18,7 @@ WIN_COLOR = (222,184,135)
 FPS = 60
 pygame.display.set_caption("Vrhcaby")
 radius = 25
-global highlightedSpikes
 highlightedSpikes = []
-global highlightedPiece
 highlightedPiece = None
 
         
@@ -29,14 +27,15 @@ def main():
     playerW = Player("white")
     global board
     board = GameBoard(playerB, playerW) 
-    board.dice1.throw()
-    board.dice2.throw()
+    board.dice1.numberOnDice = 3
+    board.dice2.numberOnDice = 2
+
+    #board.dice1.throw()
+    #board.dice2.throw()
+    global highlightedSpikes
+    global highlightedPiece
     clock = pygame.time.Clock()
     run = True
-    global highlightedSpikes
-    highlightedSpikes = []
-    global highlightedPiece
-    highlightedPiece = None
     draw()
     while run:
         clock.tick(FPS)
@@ -45,33 +44,56 @@ def main():
                 run = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click_x, click_y = event.pos
-
-                if(len(highlightedSpikes) > 0):
+                print("Začátek alg", len(highlightedSpikes))
+                if(board.playerWBar.listOfPieces==0 or highlightedPiece != None):
                     for spike in highlightedSpikes:
-                        if(pygame.draw.polygon(WIN, spike.color, spike.position).collidepoint(click_x, click_y) == True and len(spike.queueOfPieces)<=1):
-                            popedPiece = spike.addPiece(highlightedPiece)
-                            board.boardList[highlightedPiece.spikeId].removePiece()
-                            if(popedPiece != None):
-                                board.generateNewPiece(popedPiece)
-                            removeHighlight()
-                            highlightedPiece.isHighlighted = False
-                            highlightedPiece = None
-                            draw()
-            
-                for piece in board.playerPieceList:
-                    if piece.x - 25 <= click_x <= piece.x + 25 and piece.y - 25 <= click_y <= piece.y + 25:
-                        
-                        # Kliknutí na hrací kámen
-                        highlight(piece)
-                        highlightedPiece = piece
-                        
+                        if(pygame.draw.polygon(WIN, spike.color, spike.position).collidepoint(click_x, click_y) == True and spike.isHighlighted == True):
+                            if(len(spike.queueOfPieces)==0):
+                                #Spike je prázdný
+                                board.boardList[highlightedPiece.spikeId].removePiece()
+                                spike.addPiece(highlightedPiece)  
+                                highlightedPiece.addSpikeId(spike.id)  
+                                #Na spike je jeden kámen
+                            elif(len(spike.queueOfPieces)==1):
+                                if(spike.queueOfPieces[0].color == (0,0,0)):
+                                    popedPiece = spike.removePiece()
+                                    if(popedPiece != None):
+                                        #káme se vyhodí a dá se na bar
+                                        board.playerBBar.addPiece(popedPiece)
+                                board.boardList[highlightedPiece.spikeId].removePiece()
+                                spike.addPiece(highlightedPiece)
+                                highlightedPiece.addSpikeId(spike.id)
+                                #Na spike je víc kamenů
+                            elif(len(spike.queueOfPieces)>1 and len(spike.queueOfPieces) < 5 and spike.queueOfPieces[0].color == (255,255,255)):
+                                board.boardList[highlightedPiece.spikeId].removePiece()
+                                spike.addPiece(highlightedPiece)
 
-                        reDraw()
-                        break
-                    else:
+                                highlightedPiece.addSpikeId(spike.id)
+ 
+                            removeHighlight()
+                            click_x = 0
+                            click_y = 0
                         draw()
-            #TODO podle hodu kostky udělat malé kolečko hráčovy barvy podle toho, kam s piece může pohnout
-            # hodím 3.. na 3. spikeu se udělá malé bílé kolečko, když kliknu na ten spyke, piece se tam přemístí a kolečko zmizí
+                        
+                    for piece in board.playerPieceList:
+                        if (pygame.draw.circle(WIN, piece.color, piece.positions, piece.radius).collidepoint(click_x, click_y)):
+                            print("Highlight")
+                            if(highlightedPiece != None):
+                                removeHighlight()
+                            # Kliknutí na hrací kámen
+                            popPiece = board.boardList[piece.spikeId].queueOfPieces.pop()
+                            board.boardList[piece.spikeId].queueOfPieces.append(popPiece)
+                            highlight(popPiece)
+                            
+
+                            draw()
+                            break
+                        else:
+                            draw()
+                elif(pygame.draw.rect(WIN,(0,0,0),board.playerWBar.position,5).collidepoint(click_x, click_y)):
+                    print("Kámen na baru")
+                    highlight(board.playerWBar.listOfPieces[0])
+                    draw()
 
     pygame.quit()
 
@@ -88,15 +110,31 @@ def reDraw():
             piece.reDrawItself()
     pygame.display.update()
 def removeHighlight():
+    print("highlight odstraněn")
+    global highlightedSpikes
+    global highlightedPiece
     for spike in highlightedSpikes:
         spike.isHighlighted = False
+    highlightedSpikes = []
+    highlightedPiece.isHighlighted = False
+    highlightedPiece = None
     
     
 def highlight(piece):
-    highlightedSpikes.append(board.boardList[piece.spikeId + board.dice1.numberOnDice])
-    highlightedSpikes.append(board.boardList[piece.spikeId + board.dice2.numberOnDice])
-    board.boardList[piece.spikeId + board.dice1.numberOnDice].isHighlighted = True
-    board.boardList[piece.spikeId + board.dice2.numberOnDice].isHighlighted = True
+    
+    global highlightedPiece
     piece.isHighlighted = True
+    highlightedPiece = piece
+
+    
+    piece.isHighlighted = True
+    if(piece.spikeId + board.dice1.numberOnDice < len(board.boardList)):
+        highlightedSpikes.append(board.boardList[piece.spikeId + board.dice1.numberOnDice])
+        board.boardList[piece.spikeId + board.dice1.numberOnDice].isHighlighted = True
+    if(piece.spikeId + board.dice2.numberOnDice < len(board.boardList)):
+        highlightedSpikes.append(board.boardList[piece.spikeId + board.dice2.numberOnDice])
+        board.boardList[piece.spikeId + board.dice2.numberOnDice].isHighlighted = True    
+    
+    #TODO Highlightni domeček
     
 main()
