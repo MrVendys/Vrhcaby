@@ -16,7 +16,8 @@ class GameBoard:
         self.playerPieceList = []
         self.playerBBar = Bar((410,50,30,300))
         self.playerWBar = Bar((410,450,30,300))
-        testPiece = Piece((255,255,255),-1)
+        testPiece = Piece((255,255,255))
+        testPiece.allSpikes.append(self.playerWBar)
         self.playerWBar.listOfPieces.append(testPiece)
         self.createSpikes()
         self.createPieces()
@@ -25,44 +26,54 @@ class GameBoard:
         for i in range(24):
             if(i == 0):
                 for j in range(2):
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 5):
                 for j in range(5):
-                    piece = Piece((255,255,255),i)
+                    piece = Piece((255,255,255))
+                    piece.addSpike(self.boardList[i])
                     self.playerPieceList.append(piece)
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 7):
                 for j in range(3):
-                    piece = Piece((255,255,255),i)
+                    piece = Piece((255,255,255))
+                    piece.addSpike(self.boardList[i])
                     self.playerPieceList.append(piece)
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 9): #vymazat
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)        
             if(i == 10): #vymazat
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 11):
                 for j in range(5):
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 12):
                 for j in range(5):
-                    piece = Piece((255,255,255),i)
+                    piece = Piece((255,255,255))
+                    piece.addSpike(self.boardList[i])
                     self.playerPieceList.append(piece)
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 16):
                 for j in range(3):
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)            
             if(i == 18):
                 for j in range(5):
-                    piece = Piece((0,0,0),i)
+                    piece = Piece((0,0,0))
+                    piece.addSpike(self.boardList[i])
                     self.boardList[i].queueOfPieces.append(piece)
             if(i == 23):
                 for j in range(2):
-                    piece = Piece((255,255,255),i)
+                    piece = Piece((255,255,255))
+                    piece.addSpike(self.boardList[i])
                     self.playerPieceList.append(piece)
                     self.boardList[i].queueOfPieces.append(piece)
     def createSpikes(self):
@@ -90,14 +101,10 @@ class GameBoard:
         pygame.draw.rect(WIN,(0,0,0),self.playerWBar.position,5)
 
         for i in range(len(self.playerBBar.listOfPieces)):
-            self.playerBBar.listOfPieces[i].drawItself(WIN,\
-            (self.playerBBar.position[0]+15,self.playerBBar.position[1]+15+i*self.playerBBar.listOfPieces[i].radius*2)\
-            ,self.playerBBar.listOfPieces[i].radius)
+            self.playerBBar.listOfPieces[i].drawItself(WIN,(self.playerBBar.position[0]+15,self.playerBBar.position[1]+15+i*self.playerBBar.listOfPieces[i].radius*2),self.playerBBar.listOfPieces[i].radius)
         for i in range(len(self.playerWBar.listOfPieces)):
-            print(self.playerWBar.listOfPieces[i].radius)
-            self.playerWBar.listOfPieces[i].drawItself(WIN,\
-            (self.playerWBar.position[0]+15,self.playerWBar.position[1]-15-i*25*2)\
-            ,25)
+            self.playerWBar.listOfPieces[i].drawItself(WIN,(self.playerWBar.position[0]+15,self.playerWBar.position[1]-15-i*25*2),25)
+            self.playerPieceList.append(self.playerWBar.listOfPieces[i])
 
 
         startX = WIN.get_width()-100
