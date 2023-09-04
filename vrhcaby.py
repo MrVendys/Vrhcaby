@@ -6,6 +6,7 @@
 # git pull
 
 
+import time
 import pygame
 import pygame.gfxdraw
 from gameBoard import GameBoard
@@ -32,6 +33,7 @@ def main():
     global highlightedPiece
     highlightedSpikes = []
     highlightedPiece = None
+    global playerTurn
     playerTurn = True
     clock = pygame.time.Clock()
     run = True
@@ -45,7 +47,7 @@ def main():
             if(playerTurn):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_x, click_y = event.pos
-                    
+                    print(playerTurn)
                     #Klik myší
                     for spike in highlightedSpikes:
                         if(pygame.draw.polygon(WIN, spike.color, spike.position).collidepoint(click_x, click_y) == True and spike.isHighlighted == True):
@@ -53,6 +55,7 @@ def main():
                             if(len(spike.queueOfPieces)==0):
                                 movePiece(spike) 
                                 #Na spike je jeden kámen
+                                nextTurn() 
                             elif(len(spike.queueOfPieces)==1):
                     
                                 if(spike.queueOfPieces[0].color == (0,0,0)):
@@ -61,13 +64,15 @@ def main():
                                         #kámen se vyhodí a dá se na bar
                                         playerB.playerBar.addPiece(popedPiece)
                                 movePiece(spike)
+                                nextTurn() 
                                 #Na spike je víc kamenů
                             elif(len(spike.queueOfPieces)>1 and len(spike.queueOfPieces) < 5 and spike.queueOfPieces[0].color == (255,255,255)):
                                 movePiece(spike)
-    
+                                nextTurn() 
                             removeHighlight()
                             click_x = 0
                             click_y = 0
+                            
                             draw()
                             break
                         draw()
@@ -87,10 +92,18 @@ def main():
                                 draw()
                                 break
             else:
-                #hraje bot       
-                pass
+                print("Hraje bot")  
+                time.sleep(3) 
+                nextTurn()   
+                draw()
         
-
+def nextTurn():
+    global playerTurn
+    if(playerTurn == True):
+        playerTurn = False
+    else: 
+        playerTurn = True
+    board.throwDices()
        
 def draw():
     WIN.fill(WIN_COLOR)
