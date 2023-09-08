@@ -128,7 +128,17 @@ class GameBoard:
             
         self.dice1.drawItself(WIN,(255,255,255),(550,360,80,80))
         self.dice2.drawItself(WIN,(255,255,255),(650,360,80,80))
-    
+    def drawAIplays(self,WIN:Surface):
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        # create a text surface object,
+        # on which text is drawn on it.
+        text = font.render('GeeksForGeeks', True, (0,255,0), (0,0,255))
+        
+        # create a rectangular object for the
+        # text surface objet
+        textRect = text.get_rect()  
+        pygame.display_surface.blit(text, textRect)
+
 
 
 

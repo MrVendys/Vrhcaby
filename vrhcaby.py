@@ -45,6 +45,7 @@ def main():
                 run = False
                 pygame.quit()
             if(playerTurn):
+                #Hraje hráč
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_x, click_y = event.pos
                     print(playerTurn)
@@ -92,7 +93,8 @@ def main():
                                 draw()
                                 break
             else:
-                print("Hraje bot")  
+                #Hraje počítač
+                board.drawAIplays(WIN)
                 time.sleep(3) 
                 nextTurn()   
                 draw()
