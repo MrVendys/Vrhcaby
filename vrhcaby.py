@@ -43,6 +43,8 @@ def main():
     run = True
     global AIAlreadyPlay
     AIAlreadyPlay = False
+    global index
+    index = 0
     draw()
     while run:
         clock.tick(FPS)
@@ -81,42 +83,57 @@ def main():
 def AIPlay():
     global AIAlreadyPlay
     global highlightedPiece
+    global index
     AIAlreadyPlay = True
-    #když vyhodím jeden, tak ten můj se považuje za černý
     #posune figurku do domečku
     #vyhodí hráčovu figurku
     #posune se svojí figurkou
     succes = False
     while(succes == False):
-        piece = playerB.listOfPieces[0].allSpikes[-1].listOfPieces[-1]
+        piece = playerB.listOfPieces[index].allSpikes[-1].listOfPieces[-1]
+        readyToHome = []
+        for piece in playerB.listOfPieces:
+            for spike in range(18,23):
+                if(spike.allSpikes[-1].id == spike.id):
+                    readyToHome.append(True)
+                    return
 
-        if(len(playerB.playerBar.listOfPieces) > 0):
-            highlightPiece(playerB.playerBar.listOfPieces[0])
-        else:
-            highlightPiece(piece)
-        print("id spiku počátku: ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))
-        print("kostka: ",board.dice1.numberOnDice)
-        print("id spkiku",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1])+board.dice1.numberOnDice)
-        succes = lookOnSpike(board.boardList[highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]) + board.dice1.numberOnDice])
-        print("Succes je: ",succes)
-        if(succes == False):
-            succes = lookOnSpike(board.boardList[highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]) + board.dice2.numberOnDice])
-            print("id spiku počátku: ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))               
-            print("kostka: ",board.dice2.numberOnDice)
-            print("id spkiku",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1])+board.dice2.numberOnDice)
-            if(succes == False):
-                pass
+        if(len(readyToHome) != 12):
+            if(len(playerB.playerBar.listOfPieces) > 0):
+                highlightPiece(playerB.playerBar.listOfPieces[0])
+                succes = manageSpike(board.boardList[playerB.playerBar.id + board.dice1.numberOnDice])
             else:
+                highlightPiece(piece)
+                succes = manageSpike(board.boardList[highlightedPiece.allSpikes[-1].id + board.dice1.numberOnDice])
+            if(succes == False):
+                if(len(playerB.playerBar.listOfPieces) > 0):
+                    succes = manageSpike(board.boardList[playerB.playerBar.id + board.dice2.numberOnDice])
+                else:
+                    succes = manageSpike(board.boardList[highlightedPiece.allSpikes[-1].id + board.dice2.numberOnDice])
+                if(succes == False):
+                    index += 1
+                    if index >= len(playerB.listOfPieces):
+                        index = 0
+                else:
+                    break
+            else:
+                succes = True
                 break
         else:
-            succes = True
-            break
+            pass
+            #podívej se na kostku a na každý vrchní pieace a jestli může do domečku
     AIAlreadyPlay = False
 def lookOnSpike(spike: Spike):
     if(len(spike.listOfPieces) == 0):
+        print("Je to 1. true")
         manageSpike(spike)
         return True
-    if(spike.listOfPieces[0].color == (0,0,0) or (spike.listOfPieces[0].color == (255,255,255) and len(spike.listOfPieces)<2)):
+    if((spike.listOfPieces[0].color == (0,0,0) and len(spike.listOfPieces)<5)):
+        print("je to 2. true")
+        manageSpike(spike)
+        return True
+    if(spike.listOfPieces[0].color == (255,255,255) and len(spike.listOfPieces)<2):
+        print("je to 3. true")
         manageSpike(spike)
         return True
     elif(spike.listOfPieces[0].color == (255,255,255 and len(spike.listOfPieces) > 1)):
@@ -140,7 +157,6 @@ def nextTurn():
     global playerOnTurn
     global playerW
     global playerB
-    print(f"{playerOnTurn} má na baru: ",len(playerOnTurn.playerBar.listOfPieces))
     
     if(playerOnTurn == playerW):
         playerOnTurn = playerB
@@ -161,7 +177,9 @@ def highlightPiece(piece: Piece):
 def manageSpike(spike):
     #Spike je prázdný
     if(len(spike.listOfPieces)==0):
-        movePiece(spike) 
+        movePiece(spike)
+        print("Na spiku nebyl kamen")
+        return True
         #Na spike je jeden kámen
     elif(len(spike.listOfPieces)==1):
             if(spike.listOfPieces[0].color != highlightedPiece.color):
@@ -171,10 +189,15 @@ def manageSpike(spike):
                 player.playerBar.addPiece(poppedPiece)
                 poppedPiece.allSpikes.append( player.playerBar) 
             movePiece(spike)
+            print("Na spiku byl jeden kamen kamen")
+            return True
         #Na spike je víc kamenu
-    elif(len(spike.listOfPieces)>1 and len(spike.listOfPieces) < 5 and spike.listOfPieces[0].color == (255,255,255)):
+    elif(len(spike.listOfPieces)>1 and len(spike.listOfPieces) < 5 and spike.listOfPieces[0].color == playerOnTurn.listOfPieces[0].color):
         movePiece(spike)
-    elif(playerOnTurn == playerB):
+        print("Na spiku bylo více kamenu stejne barvy")
+        return True
+    if(playerOnTurn == playerB):
+        print("Na spiku bylo vice kamenu opacne barvy")
         return False
     removeHighlight()
     draw()
@@ -184,11 +207,14 @@ def draw():
     pygame.display.update()
 
 def movePiece(spike):
+   
     global highlightedPiece
+    print("Hello 2 ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))
     highlightedPiece.allSpikes[-1].removePiece()
     difference = abs(spike.id - highlightedPiece.allSpikes[-1].id)
     #useDice(board.dice1 if difference == board.dice1.numberOnDice else board.dice2)
     spike.addPiece(highlightedPiece)
+    print("Spike id ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))
     highlightedPiece.addSpike(spike)
     nextTurn()  
 def useDice(dice: Dice):

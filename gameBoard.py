@@ -70,7 +70,7 @@ class GameBoard:
         else:
             self.playerB.addPiece(piece)
     def createSpikes(self):
-         for i in range(24):
+        for i in range(24):
             gameSpike = Spike((139,69,19) if i%2 == 0 else (205,133,63),i)
             self.boardList.append(gameSpike)
     def throwDices(self):

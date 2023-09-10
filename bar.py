@@ -1,5 +1,3 @@
-import pygame
-
 from piece import Piece
 
 
