@@ -91,7 +91,7 @@ class GameBoard:
 
         pygame.draw.rect(WIN,(0,0,0),self.playerB.playerBar.position,5)
         pygame.draw.rect(WIN,(0,0,0),self.playerW.playerBar.position,5)
-        pygame.draw.rect(WIN,(0,0,0),(WIN.get_width()-75,50,50,300))
+        #pygame.draw.rect(WIN,(0,0,0),(WIN.get_width()-75,50,50,300))
 
         #Vykreslování kamenů na 
         for i in range(len(self.playerB.playerBar.listOfPieces)):
