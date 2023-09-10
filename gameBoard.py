@@ -5,6 +5,7 @@ from dice import Dice
 from spike import Spike
 from piece import Piece
 from player import Player 
+import sys
 
 class GameBoard:
     def __init__(self, playerB: Player, playerW: Player):
@@ -14,8 +15,8 @@ class GameBoard:
         self.dice2 = Dice()
         self.boardList = []
         self.playerPieceList = []
-        self.playerBBar = Bar((410,50,30,300))
-        self.playerWBar = Bar((410,450,30,300))
+        self.playerBBar = Bar((410,50,30,300),-1)
+        self.playerWBar = Bar((410,450,30,300),24)
         playerB.playerBar = self.playerBBar
         playerW.playerBar = self.playerWBar
         self.createSpikes()
@@ -63,7 +64,7 @@ class GameBoard:
     def managePiece(self,color: tuple, index):
         piece = Piece(color)
         piece.addSpike(self.boardList[index])
-        self.boardList[index].queueOfPieces.append(piece)
+        self.boardList[index].listOfPieces.append(piece)
         if(color == (255,255,255)):
             self.playerW.addPiece(piece)
         else:
@@ -90,6 +91,7 @@ class GameBoard:
 
         pygame.draw.rect(WIN,(0,0,0),self.playerB.playerBar.position,5)
         pygame.draw.rect(WIN,(0,0,0),self.playerW.playerBar.position,5)
+        pygame.draw.rect(WIN,(0,0,0),(WIN.get_width()-75,50,50,300))
 
         #Vykreslování kamenů na 
         for i in range(len(self.playerB.playerBar.listOfPieces)):
@@ -111,9 +113,9 @@ class GameBoard:
             if(i==6): 
                 startX -= 50
             self.boardList[i].drawItself(WIN,[[startX-i*width,startY],[startX-width-i*width,startY],[startX-25-i*width,startY+300]])
-            if len(self.boardList[i].queueOfPieces) > 0:
-                for j in range(len(self.boardList[i].queueOfPieces)):
-                    self.boardList[i].queueOfPieces[j].drawItself(WIN,(startX-i*width-radius,startY+j*width+radius),radius)
+            if len(self.boardList[i].listOfPieces) > 0:
+                for j in range(len(self.boardList[i].listOfPieces)):
+                    self.boardList[i].listOfPieces[j].drawItself(WIN,(startX-i*width-radius,startY+j*width+radius),radius)
 
         #spodní bodce
         startX = 100
@@ -122,22 +124,42 @@ class GameBoard:
             if(i==6): 
                 startX += 50
             self.boardList[i+12].drawItself(WIN,[[startX+i*width,startY],[startX+width+i*width,startY],[startX+width/2+i*width,startY-300]])
-            if len(self.boardList[i+12].queueOfPieces) > 0:
-                for j in range(len(self.boardList[i+12].queueOfPieces)):
-                    self.boardList[i+12].queueOfPieces[j].drawItself(WIN,(startX+i*width+radius,startY-j*width-radius),radius)
+            if len(self.boardList[i+12].listOfPieces) > 0:
+                for j in range(len(self.boardList[i+12].listOfPieces)):
+                    self.boardList[i+12].listOfPieces[j].drawItself(WIN,(startX+i*width+radius,startY-j*width-radius),radius)
             
         self.dice1.drawItself(WIN,(255,255,255),(550,360,80,80))
         self.dice2.drawItself(WIN,(255,255,255),(650,360,80,80))
     def drawAIplays(self,WIN:Surface):
-        font = pygame.font.Font('freesansbold.ttf', 32)
-        # create a text surface object,
-        # on which text is drawn on it.
-        text = font.render('GeeksForGeeks', True, (0,255,0), (0,0,255))
-        
-        # create a rectangular object for the
-        # text surface objet
-        textRect = text.get_rect()  
-        pygame.display_surface.blit(text, textRect)
+        pygame.font.init()
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        TRANSPARENT = (0, 0, 0, 0)  # Průhledná barva
+
+        # Font pro text
+        font = pygame.font.Font(None, 36)
+
+        # Text pro zobrazení
+        text = "Hraje počítač"
+        text_surface = font.render(text, True, WHITE)
+
+        # Čtverec pro indikaci tahu hráče
+        square_width = 200
+        square_height = 100
+        square_x = (WIN.get_width() - square_width) // 2
+        square_y = (WIN.get_height() - square_height) // 2
+        square_color = TRANSPARENT  # Počáteční průhledný čtverec
+
+        # Časovač pro zobrazení čtverce
+        show_square_delay = 3  # Zobrazení na 3 sekundy
+        show_square_start_time = None
+        text_x = (WIN.get_width() - text_surface.get_width()) // 2
+        text_y = (WIN.get_height() - text_surface.get_height()) // 2
+        pygame.draw.rect(WIN, square_color, (square_x, square_y, square_width, square_height))
+        WIN.blit(text_surface, (text_x, text_y))
+
+        # Vykreslení čtverce
+        pygame.display.flip()
 
 
 

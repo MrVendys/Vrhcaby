@@ -7,7 +7,7 @@ class Spike:
     def __init__(self,color, id):
         self.id = id
         self.position = []
-        self.queueOfPieces = []
+        self.listOfPieces = []
         self.surface = None
         self.color = color
         self.isHighlighted = False
@@ -17,8 +17,8 @@ class Spike:
         self.surface = WIN
         pygame.draw.polygon(WIN,self.color if self.isHighlighted == False else self.HighlightedColor , position)
     def addPiece(self,piece: Piece):
-        self.queueOfPieces.append(piece)
+        self.listOfPieces.append(piece)
     def removePiece(self):
-        return self.queueOfPieces.pop()
+        return self.listOfPieces.pop()
                 
 
