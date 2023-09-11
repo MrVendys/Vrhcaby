@@ -1,11 +1,3 @@
-# git config user.email "vasik.ptak@gmail.com"
-# git config user.name "MrVendys"
-# git add . -> přidá všechny soubory od Gitu
-# git commit -m "přidal jsem soubor vrhcaby"
-# git push
-# git pull
-
-
 import time
 import pygame
 import pygame.gfxdraw
@@ -29,10 +21,8 @@ def main():
     playerW = Player("white")
     global board
     board = GameBoard(playerB, playerW) 
-    board.dice1.numberOnDice = 1
-    board.dice2.numberOnDice = 2
-    #board.dice1.throw()
-    #board.dice2.throw()
+    board.dice1.throw()
+    board.dice2.throw()
     global highlightedSpikes
     global highlightedPiece
     highlightedSpikes = []
@@ -46,10 +36,11 @@ def main():
     global index
     index = 0
     global succes
-    global readyToHome
-    readyToHome = False
+    global succesCounter
     global playerWIsReady
     playerWIsReady = False
+    global playerBIsReady
+    playerBIsReady = False
     draw()
     while run:
         clock.tick(FPS)
@@ -58,21 +49,20 @@ def main():
                 run = False
                 pygame.quit()
             draw()
-            if(playerOnTurn == playerW):
-                if(pygame.draw.rect(WIN,(0,0,0),board.homeW.position) and board.homeW.isHighlighted):
-                    manageHome()
                 #Hraje hráč
+            if(playerOnTurn == playerW):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_x, click_y = event.pos
                     #Klik myší
+                    if(pygame.draw.rect(WIN,(0,0,0),board.homeW.position).collidepoint(click_x, click_y) and board.homeW.isHighlighted):
+                        manageHome()
                     for spike in highlightedSpikes:
                         # Kliknutí na spike
                         if(pygame.draw.polygon(WIN, spike.color, spike.position).collidepoint(click_x, click_y) == True and spike.isHighlighted == True):
                             manageSpike(spike)
                             click_x = 0
                             click_y = 0
-                            break
-                        draw()
+                            draw()
                     if(len(playerW.playerBar.listOfPieces)>0):
                         # Kliknutí na hrací kámen na baru
                         if(pygame.draw.rect(WIN,(0,0,0),playerW.playerBar.position,5).collidepoint(click_x, click_y)):
@@ -82,50 +72,39 @@ def main():
                         for piece in playerW.listOfPieces:
                             if (pygame.draw.circle(WIN, piece.color, piece.positions, piece.radius).collidepoint(click_x, click_y)):
                                 highlightPiece(piece)
-                                break
             else:
                 #Hraje počítač
                 board.drawAIplays(True)
                 draw()
                 if(AIAlreadyPlay == False):
                     index = 0
-                    print("Změna kol")
                     AIPlay()
                 
 def AIPlay():
-    
+    global succesCounter
+    succesCounter = []
     global AIAlreadyPlay
-    global highlightedPiece
     global index
     global succes
     AIAlreadyPlay = True
-    #posune figurku do domečku
-    #vyhodí hráčovu figurku
-    #posune se svojí figurkou
     succes = False
     if(playerOnTurn != playerB):
         return
-    print(succes)
+    if(len(succesCounter) >= 3):
+        useDice(board.dice1)
+        useDice(board.dice2)
+        nextTurn()
+        return
     while(succes == False):
-        print("Hraje počítač")
-        """
-        for piece in playerB.listOfPieces:
-            for spike in range(18,23):
-                if(spike.allSpikes[-1].id == spike.id):
-                    readyToHome.append(True)
-                    return
-        """
         if(board.dice1.numberOnDice !=0 or board.dice2.numberOnDice != 0):
             time.sleep(2)
-            print("Chackuje 1. kostku")
+            #AI zkusí hrát s první kostkou
             lookOnSpike(board.dice1.numberOnDice) if board.dice1.numberOnDice !=0 else False
-            print("succes = ",succes)
             if(succes == False):
-               print("Chackuje 2. kostku")
+               #AI zkusí hrát s druhou kostkou
                lookOnSpike(board.dice2.numberOnDice) if board.dice2.numberOnDice !=0 else False
                print("succes = ",succes)
                if(succes == False):
-                   print("Ani jedna, zkusí další piece")
                    index += 1
                    if index >= len(playerB.listOfPieces):
                        index = 0
@@ -140,35 +119,53 @@ def AIPlay():
 def lookOnSpike(dice):
         global index
         global succes
+        global succesCounter
         if(len(playerB.playerBar.listOfPieces) > 0):
             highlightPiece(playerB.playerBar.listOfPieces[0])
-            if(playerB.playerBar.id + dice <=23):
-                manageSpike(board.boardList[playerB.playerBar.id + dice])
-            else:
-                #podívej se do domečku
-                pass
+            manageSpike(board.boardList[playerB.playerBar.id + dice])
+            if(succes == False):
+                succesCounter.append(False)
         else:
             highlightPiece(playerB.listOfPieces[index].allSpikes[-1].listOfPieces[-1])
-            if(highlightedPiece.allSpikes[-1].id + dice <= 23):
+            if(playerBIsReady):
+                manageHome()
+            elif(highlightedPiece.allSpikes[-1].id + dice < 24):
                 manageSpike(board.boardList[highlightedPiece.allSpikes[-1].id + dice])
             else:
-                #podívej se do domečku
+                succes = False
                 pass
+        
 
 def manageHome():
-    if(highlightedPiece.allSpikes[-1].id + board.dice1.numberOnDice == 25):
-        useDice(board.dice1)
-        
-    elif(highlightedPiece.allSpikes[-1].id + board.dice1.numberOnDice == 25):
-        useDice(board.dice2)
+    home = None
+    global succes
+    if(playerOnTurn == playerW):
+        if(highlightedPiece.allSpikes[-1].id - board.dice1.numberOnDice == -1):
+            useDice(board.dice1)
+            home = board.homeW
+        elif(highlightedPiece.allSpikes[-1].id - board.dice2.numberOnDice == -1):
+            useDice(board.dice2)
+            home = board.homeW
+    else:
+        if(highlightedPiece.allSpikes[-1].id + board.dice1.numberOnDice == 24):
+            useDice(board.dice1)
+            home = board.homeB
+        elif(highlightedPiece.allSpikes[-1].id + board.dice2.numberOnDice == 24):
+            useDice(board.dice2)
+            home = board.homeB
+        else:
+            succes = False
+            return
     highlightedPiece.allSpikes[-1].removePiece()
-    board.homeW.addPiece(highlightedPiece)
+    home.addPiece(highlightedPiece)
+    succes = True
     removeHighlight()
     draw()
+    nextTurn()
 def manageSpike(spike):
-    #Spike je prázdnýs
+    #Spike je prázdný
+    global succes
     if(len(spike.listOfPieces)==0):
-        print("Na spiku nebyl kamen")
         succes = True
         movePiece(spike)
         #Na spike je jeden kámen
@@ -179,35 +176,44 @@ def manageSpike(spike):
                 poppedPiece = spike.removePiece()
                 player.playerBar.addPiece(poppedPiece)
                 poppedPiece.allSpikes.append( player.playerBar) 
-            print("Na spiku byl jeden kamen")
             succes = True
             movePiece(spike)
         #Na spike je víc kamenu
     elif(len(spike.listOfPieces)>1 and len(spike.listOfPieces) < 5 and spike.listOfPieces[0].color == playerOnTurn.listOfPieces[0].color):
-        print("Na spiku bylo více kamenu stejne barvy")
         succes = True
         movePiece(spike)
     if(playerOnTurn == playerB):
-        print("Na spiku bylo vice kamenu opacne barvy")
         succes = False
     draw()
-
+def checkHome():
+    global playerWIsReady
+    global playerBIsReady
+    filtered_list = []
+    if(playerOnTurn == playerW):
+        for i in range(0,6):
+            list = ([item for item in board.boardList[i].listOfPieces if item.color == (255,255,255)])
+            filtered_list = filtered_list + list
+        if(len(filtered_list) == 15):
+            playerWIsReady = True
+    if(playerOnTurn == playerB):
+        for i in range(18,23):
+            list = ([item for item in board.boardList[i].listOfPieces if item.color == (0,0,0)])
+            filtered_list = filtered_list + list
+        if(len(filtered_list) == 15):
+            playerBIsReady = True
 def movePiece(spike):
     global highlightedPiece
-    print("Hello 2 ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))
     highlightedPiece.allSpikes[-1].removePiece()
     difference = abs(spike.id - highlightedPiece.allSpikes[-1].id)
     useDice(board.dice1 if difference == board.dice1.numberOnDice else board.dice2)
     spike.addPiece(highlightedPiece)
-    print("Spike id ",highlightedPiece.allSpikes.index(highlightedPiece.allSpikes[-1]))
     highlightedPiece.addSpike(spike)
     removeHighlight()
+    checkHome()
     draw()
     nextTurn()
 def useDice(dice: Dice):
-        print("Použila se kostka")
-        dice.numberOnDice = 0
-    
+    dice.numberOnDice = 0
 def highlightPiece(piece: Piece):
     global highlightedPiece
     global playerW
@@ -226,7 +232,7 @@ def removeHighlight():
     highlightedSpikes = []
     highlightedPiece.isHighlighted = False
     highlightedPiece = None
-    
+    board.homeW.isHighlighted = False
     
 def highlight(piece):
     global highlightedPiece
@@ -238,7 +244,7 @@ def highlight(piece):
         if(playerWIsReady and highlightSpike1 == -1):
             #highlight domeček
             board.homeW.isHighlighted = True
-            
+            return
         elif(highlightSpike1 >= 0):
             highlightedSpikes.append(board.boardList[highlightSpike1])
             board.boardList[highlightSpike1].isHighlighted = True
@@ -247,12 +253,11 @@ def highlight(piece):
         if(playerWIsReady and highlightSpike2 == -1):
             #highlight domeček
             board.homeW.isHighlighted = True
-            pass
+            return
         elif(highlightSpike2 >= 0):
             highlightedSpikes.append(board.boardList[highlightSpike2])
             board.boardList[highlightSpike2].isHighlighted = True  
 def nextTurn():
-    print("Next turn")
     global AIAlreadyPlay
     if(board.dice1.numberOnDice == 0 and board.dice2.numberOnDice == 0):
     
@@ -267,19 +272,14 @@ def nextTurn():
             playerOnTurn = playerW
         print(playerOnTurn)
         board.throwDices() 
-        print("Kostka 1: ", board.dice1.numberOnDice)
-        print("Kostka 2: ", board.dice2.numberOnDice)
         draw()
     elif(playerOnTurn == playerB):
         AIAlreadyPlay = False
     else:
-        
         AIAlreadyPlay = False
 def draw():
     WIN.fill(WIN_COLOR)
     board.drawGameBoard(WIN)
     pygame.display.update()
-    
-    #TODO Checkovat spiky, jestli jsou plný do domečku
     
 main()
