@@ -1,3 +1,4 @@
+from home import Home
 import pygame
 from pygame import Surface
 from bar import Bar
@@ -19,18 +20,25 @@ class GameBoard:
         self.playerWBar = Bar((410,450,30,300),24)
         playerB.playerBar = self.playerBBar
         playerW.playerBar = self.playerWBar
+        self.homeB = Home()
+        self.homeW = Home()
         self.createSpikes()
         self.createPieces()
+        self.drawAIScreen = False
         
     def createPieces(self):
         testPiece = Piece((255,255,255))
         testPiece.allSpikes.append(self.playerW.playerBar)
+        self.homeB.addPiece(testPiece)
+        self.homeB.addPiece(testPiece)
+
         self.playerW.playerBar.addPiece(testPiece)
         self.playerW.addPiece(testPiece)
         for i in range(24):
             if(i == 0):
                 for j in range(2):
                     self.managePiece((0,0,0),i)
+                
             if(i == 5):
                 for j in range(5):
                     self.managePiece((255,255,255),i)
@@ -69,6 +77,7 @@ class GameBoard:
             self.playerW.addPiece(piece)
         else:
             self.playerB.addPiece(piece)
+        
     def createSpikes(self):
         for i in range(24):
             gameSpike = Spike((139,69,19) if i%2 == 0 else (205,133,63),i)
@@ -91,9 +100,12 @@ class GameBoard:
 
         pygame.draw.rect(WIN,(0,0,0),self.playerB.playerBar.position,5)
         pygame.draw.rect(WIN,(0,0,0),self.playerW.playerBar.position,5)
-        #pygame.draw.rect(WIN,(0,0,0),(WIN.get_width()-75,50,50,300))
+        #vykreslovani kamenu na home
+        self.homeB.drawItSelf(WIN,(0,0,0),(255,255,255),(WIN.get_width()-75,50,50,300))
+        self.homeW.drawItSelf(WIN,(255,255,255),(0,0,0),(WIN.get_width()-75,WIN.get_height()-300,50,300))
 
-        #Vykreslování kamenů na 
+
+        #Vykreslování kamenů na baru
         for i in range(len(self.playerB.playerBar.listOfPieces)):
             radius = 25
             piece = self.playerB.playerBar.listOfPieces[i]
@@ -103,7 +115,8 @@ class GameBoard:
             radius = 25
             self.playerW.playerBar.listOfPieces[i].drawItself(WIN,\
             (self.playerW.playerBar.position[0]+15,self.playerW.playerBar.position[1]-15-i*radius*2),radius)
-            
+        
+        
         #horní bodce
         startX = WIN.get_width()-100
         startY = 50
@@ -130,36 +143,34 @@ class GameBoard:
             
         self.dice1.drawItself(WIN,(255,255,255),(550,360,80,80))
         self.dice2.drawItself(WIN,(255,255,255),(650,360,80,80))
-    def drawAIplays(self,WIN:Surface):
-        pygame.font.init()
-        WHITE = (255, 255, 255)
-        BLACK = (0, 0, 0)
-        TRANSPARENT = (0, 0, 0, 0)  # Průhledná barva
+        if(self.drawAIScreen):
+            pygame.font.init()
+            WHITE = (255, 255, 255)
+            BLACK = (0, 0, 0)
+            TRANSPARENT = (0, 0, 0, 0)
 
-        # Font pro text
-        font = pygame.font.Font(None, 36)
+            font = pygame.font.Font(None, 36)
 
-        # Text pro zobrazení
-        text = "Hraje počítač"
-        text_surface = font.render(text, True, WHITE)
+            text = "Hraje počítač"
+            text_surface = font.render(text, True, WHITE)
 
-        # Čtverec pro indikaci tahu hráče
-        square_width = 200
-        square_height = 100
-        square_x = (WIN.get_width() - square_width) // 2
-        square_y = (WIN.get_height() - square_height) // 2
-        square_color = TRANSPARENT  # Počáteční průhledný čtverec
+            square_width = 200
+            square_height = 100
+            square_x = (WIN.get_width() - square_width) // 2
+            square_y = (WIN.get_height() - square_height) // 2
+            square_color = TRANSPARENT  # Počáteční průhledný čtverec
 
-        # Časovač pro zobrazení čtverce
-        show_square_delay = 3  # Zobrazení na 3 sekundy
-        show_square_start_time = None
-        text_x = (WIN.get_width() - text_surface.get_width()) // 2
-        text_y = (WIN.get_height() - text_surface.get_height()) // 2
-        pygame.draw.rect(WIN, square_color, (square_x, square_y, square_width, square_height))
-        WIN.blit(text_surface, (text_x, text_y))
+            text_x = (WIN.get_width() - text_surface.get_width()) // 2
+            text_y = (WIN.get_height() - text_surface.get_height()) // 2
+            pygame.draw.rect(WIN, square_color, (square_x, square_y, square_width, square_height))
+            WIN.blit(text_surface, (text_x, text_y))
 
-        # Vykreslení čtverce
-        pygame.display.flip()
+            # Vykreslení čtverce
+            pygame.display.flip()
+
+    def drawAIplays(self,draw: bool):
+        self.drawAIScreen = draw
+        
 
 
 
