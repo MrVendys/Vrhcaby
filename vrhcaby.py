@@ -17,8 +17,8 @@ pygame.display.set_caption("Vrhcaby")
 def main():
     global playerB
     global playerW
-    playerB = Player("black")
-    playerW = Player("white")
+    playerB = Player()
+    playerW = Player()
     global board
     board = GameBoard(playerB, playerW) 
     board.dice1.throw()
@@ -51,7 +51,9 @@ def main():
             draw()
                 #Hraje hráč
             if(playerOnTurn == playerW):
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if (event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_RIGHT):
+                    skipTurn()
+                if (event.type == pygame.MOUSEBUTTONDOWN):
                     click_x, click_y = event.pos
                     #Klik myší
                     if(pygame.draw.rect(WIN,(0,0,0),board.homeW.position).collidepoint(click_x, click_y) and board.homeW.isHighlighted):
@@ -91,24 +93,27 @@ def AIPlay():
     if(playerOnTurn != playerB):
         return
     if(len(succesCounter) >= 3):
-        useDice(board.dice1)
-        useDice(board.dice2)
-        nextTurn()
+        skipTurn()
         return
     while(succes == False):
         if(board.dice1.numberOnDice !=0 or board.dice2.numberOnDice != 0):
-            time.sleep(2)
             #AI zkusí hrát s první kostkou
-            lookOnSpike(board.dice1.numberOnDice) if board.dice1.numberOnDice !=0 else False
+            if(playerB.listOfPieces[index].id == playerB.listOfPieces[index].allSpikes[-1].listOfPieces[-1].id):
+                lookOnSpike(board.dice1.numberOnDice) if board.dice1.numberOnDice !=0 else False
+            else:
+                succes = False
             if(succes == False):
                #AI zkusí hrát s druhou kostkou
-               lookOnSpike(board.dice2.numberOnDice) if board.dice2.numberOnDice !=0 else False
-               print("succes = ",succes)
-               if(succes == False):
+                if(playerB.listOfPieces[index].id == playerB.listOfPieces[index].allSpikes[-1].listOfPieces[-1].id):
+                    lookOnSpike(board.dice2.numberOnDice) if board.dice2.numberOnDice !=0 else False
+                else:
+                    succes = False
+                if(succes == False):
                    index += 1
                    if index >= len(playerB.listOfPieces):
                        index = 0
-               else:
+                       skipTurn()
+                else:
                    break
             else:
                 break
@@ -126,7 +131,7 @@ def lookOnSpike(dice):
             if(succes == False):
                 succesCounter.append(False)
         else:
-            highlightPiece(playerB.listOfPieces[index].allSpikes[-1].listOfPieces[-1])
+            highlightPiece(playerB.listOfPieces[index])
             if(playerBIsReady):
                 manageHome()
             elif(highlightedPiece.allSpikes[-1].id + dice < 24):
@@ -182,8 +187,11 @@ def manageSpike(spike):
     elif(len(spike.listOfPieces)>1 and len(spike.listOfPieces) < 5 and spike.listOfPieces[0].color == playerOnTurn.listOfPieces[0].color):
         succes = True
         movePiece(spike)
-    if(playerOnTurn == playerB):
-        succes = False
+    else:
+        if(playerOnTurn == playerW):
+            skipTurn()
+        if(playerOnTurn == playerB):
+            succes = False
     draw()
 def checkHome():
     global playerWIsReady
@@ -202,6 +210,8 @@ def checkHome():
         if(len(filtered_list) == 15):
             playerBIsReady = True
 def movePiece(spike):
+    if(playerOnTurn == playerB):
+        time.sleep(2)
     global highlightedPiece
     highlightedPiece.allSpikes[-1].removePiece()
     difference = abs(spike.id - highlightedPiece.allSpikes[-1].id)
@@ -270,13 +280,18 @@ def nextTurn():
         else: 
             board.drawAIplays(False)
             playerOnTurn = playerW
-        print(playerOnTurn)
         board.throwDices() 
         draw()
     elif(playerOnTurn == playerB):
         AIAlreadyPlay = False
     else:
         AIAlreadyPlay = False
+def skipTurn():
+    global AIAlreadyPlay
+    useDice(board.dice1)
+    useDice(board.dice2)
+    AIAlreadyPlay = False
+    nextTurn()
 def draw():
     WIN.fill(WIN_COLOR)
     board.drawGameBoard(WIN)
